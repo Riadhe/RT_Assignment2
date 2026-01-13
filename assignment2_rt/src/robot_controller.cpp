@@ -5,7 +5,7 @@
 #include "assignment2_custom_msgs/srv/get_avg_vel.hpp"
 #include "assignment2_custom_msgs/srv/change_threshold.hpp"
 #include <deque>
-
+ 
 using namespace std::chrono_literals;
 using std::placeholders::_1; 
 using std::placeholders::_2;
@@ -16,21 +16,22 @@ public:
         // 1. Setup Communication (Using 'auto' to keep it short)
         scan_sub_ = create_subscription<sensor_msgs::msg::LaserScan>("/scan", 10, std::bind(&RobotController::scan_callback, this, _1));
         vel_sub_  = create_subscription<geometry_msgs::msg::Twist>("/cmd_vel", 10, std::bind(&RobotController::vel_callback, this, _1));
-        
+        // 2. Publishers
         vel_pub_   = create_publisher<geometry_msgs::msg::Twist>("/cmd_vel", 10);
         state_pub_ = create_publisher<assignment2_custom_msgs::msg::RobotState>("/robot_state", 10);
-        
+        // 3. Services
         srv_avg_ = create_service<assignment2_custom_msgs::srv::GetAvgVel>("get_avg_vel", std::bind(&RobotController::get_avg, this, _1, _2));
         srv_thr_ = create_service<assignment2_custom_msgs::srv::ChangeThreshold>("change_threshold", std::bind(&RobotController::change_thr, this, _1, _2));
-        
+        // 4. Log Info
         RCLCPP_INFO(get_logger(), "Controller Ready.");
     }
 
 private:
+// Internal State
     float threshold_ = 1.0;
     std::deque<geometry_msgs::msg::Twist> history_;
     
-    // ROS Objects (We declare them here)
+    // ROS Objects (we declare them here)
     rclcpp::Subscription<sensor_msgs::msg::LaserScan>::SharedPtr scan_sub_;
     rclcpp::Subscription<geometry_msgs::msg::Twist>::SharedPtr vel_sub_;
     rclcpp::Publisher<geometry_msgs::msg::Twist>::SharedPtr vel_pub_;
@@ -38,7 +39,7 @@ private:
     rclcpp::Service<assignment2_custom_msgs::srv::GetAvgVel>::SharedPtr srv_avg_;
     rclcpp::Service<assignment2_custom_msgs::srv::ChangeThreshold>::SharedPtr srv_thr_;
 
-    // --- MAIN LOGIC ---
+    // Laser Scan Callback
     void scan_callback(const sensor_msgs::msg::LaserScan::SharedPtr msg) {
         // 1. Find closest point
         float min_dist = 100.0;
@@ -100,7 +101,7 @@ private:
         res->success = true;
     }
 };
-
+// Main Function
 int main(int argc, char * argv[]) {
   rclcpp::init(argc, argv);
   rclcpp::spin(std::make_shared<RobotController>());

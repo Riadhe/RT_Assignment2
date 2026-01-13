@@ -23,7 +23,7 @@ class UI(Node):
             
             # Send 10 times (Spamming logic)
             for _ in range(10): self.pub.publish(msg)
-            print(f"--> Sent: Lin={lin}, Ang={ang}")
+            print(f"--> Sent: Linear Velocity ={lin}, Angular Velocity={ang}")
             
         except ValueError:
             print("Erreur: Invalid Number!")
@@ -42,19 +42,20 @@ class UI(Node):
 
     def set_threshold(self):
         try:
+            # Input new threshold
             val = float(input("Enter new Safety Threshold (e.g. 0.5): "))
-            
+            # Call service to update
             if not self.cli_thr.wait_for_service(1.0):
                 print("Service not available!")
                 return
-            
+            # Prepare request
             req = ChangeThreshold.Request()
             req.new_threshold = val
-            
+            # Call service
             future = self.cli_thr.call_async(req)
             rclpy.spin_until_future_complete(self, future)
             print(f"--> Threshold updated to {val} successfully!")
-            
+            # No error handling for simplicity
         except ValueError:
             print("Invalid Number!")
 
@@ -63,15 +64,17 @@ def main(args=None):
     node = UI()
 
     # The nice Menu output you wanted
-    print("\n--- ROBOT CONTROLLER UI ---")
+    print("\n ------------------------------")
+    print("\n ROBOT CONTROLLER UI")
+    print("\n ------------------------------")
     print("1. Drive Robot")
-    print("2. Get Average Velocity (Service)")
-    print("3. Change Safety Threshold (Service)")
+    print("2. Get Average Velocity ")
+    print("3. Change Safety Threshold")
     print("0. Exit")
 
     while True:
-        choice = input("\nChoose option: ")
-        
+        choice = input("\nChoose option : ")
+        # Handle choices
         if choice == '1': node.drive()
         elif choice == '2': node.get_avg()
         elif choice == '3': node.set_threshold()
