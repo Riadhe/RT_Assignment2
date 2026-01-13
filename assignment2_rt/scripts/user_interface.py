@@ -64,9 +64,9 @@ def main(args=None):
     node = UI()
 
     # The nice Menu output you wanted
-    print("\n ------------------------------")
-    print("\n ROBOT CONTROLLER UI")
-    print("\n ------------------------------")
+    print("------------------------------")
+    print(" Robot Controller UI")
+    print("------------------------------")
     print("1. Drive Robot")
     print("2. Get Average Velocity ")
     print("3. Change Safety Threshold")
