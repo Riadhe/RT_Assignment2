@@ -71,13 +71,11 @@ Clone the repository into your workspace `src` folder and build the packages:
 cd ~/ros2_ws/src
 # (Clone your repository here)
 cd ~/ros2_ws
-
-```
 # Build the custom interfaces first, then the logic
 colcon build --packages-select assignment2_custom_msgs
 colcon build --packages-select assignment2_rt
-
 source install/setup.bash
+```
 ## How to Run
 ### Step 1: Launch the Simulation
 This command starts the environment, the robot model, and the autonomous controller.
