@@ -62,7 +62,7 @@ def main(args=None):
     rclpy.init(args=args)
     node = UI()
 
-    # The nice Menu output 
+    # Menu output 
     print("------------------------------")
     print(" Robot Controller UI")
     print("------------------------------")
