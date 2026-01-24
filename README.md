@@ -4,10 +4,7 @@
 
 ---
 
-## 📖 Project Description
-This package implements a control architecture for a mobile robot in Gazebo. The system allows a user to manually drive the robot while ensuring safety through an **automatic collision avoidance system**.
-
-The core feature of this project is a **"Gatekeeper" architecture**. Instead of the user writing directly to the robot's wheels, user commands are filtered through a C++ controller. This prevents conflicts between manual inputs and safety overrides.## Project Description
+##  Project Description
 This assignment implements a control system for a mobile robot using **ROS 2**. The system is composed of two main nodes that communicate using Topics and Services.
 
 The goal is to drive a robot around a circuit while automatically avoiding obstacles using Laser Scan data.
@@ -70,7 +67,7 @@ The package uses the following custom definitions:
 ##  Installation & Build
 
 ### Prerequisites
-* ROS 2 (Humble or Foxy)
+* ROS 2 (Jazzy)
 * Gazebo Simulator
 * `bme_gazebo_sensors` package (for Laser simulation)
 
@@ -106,12 +103,12 @@ ros2 run assignment2_rt user_interface.py
 ```
 ## Controls (User Interface)
 
-* e,Move Forward
-* d,Move Backward
-* s,Turn Left
-* f,Turn Right
-* x,Stop / Reset Safety Lock
-* q,Quit
+* e --> Move Forward
+* d --> Move Backward
+* s --> Turn Left
+* f --> Turn Right
+* x --> Stop OR Reset Safety Lock
+* q --> Quit
 
 
 **Note**: If the robot enters "Safety Mode" and backs up, it will stop and refuse to move. You must press X to acknowledge the stop before you can drive again.
