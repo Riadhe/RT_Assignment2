@@ -1,6 +1,13 @@
 # ROS 2 Robot Controller - Assignment 2
 
-## Project Description
+**Author:** Riadh Bahri 
+
+---
+
+## 📖 Project Description
+This package implements a control architecture for a mobile robot in Gazebo. The system allows a user to manually drive the robot while ensuring safety through an **automatic collision avoidance system**.
+
+The core feature of this project is a **"Gatekeeper" architecture**. Instead of the user writing directly to the robot's wheels, user commands are filtered through a C++ controller. This prevents conflicts between manual inputs and safety overrides.## Project Description
 This assignment implements a control system for a mobile robot using **ROS 2**. The system is composed of two main nodes that communicate using Topics and Services.
 
 The goal is to drive a robot around a circuit while automatically avoiding obstacles using Laser Scan data.
@@ -12,51 +19,54 @@ The project demonstrates key ROS 2 concepts:
 
 ---
 
-## Package Structure
-The solution is organized into two separate packages:
-
-### 1. `assignment2_rt` (Source Code)
-This package contains the logic nodes and launch files.
-* `src/robot_controller.cpp`: The C++ core node handling navigation and collision avoidance.
-* `scripts/user_interface.py`: The Python node for user interaction.
-* `launch/assignment2.launch.py`: A master launch file that starts Gazebo, Rviz, and the controller node simultaneously.
-
-### 2. `assignment2_custom_msgs` (Interfaces)
-This package defines the custom data structures used for communication.
-* `srv/GetAvgVel.srv`: A custom service definition. It returns the calculated average linear and angular velocity of the robot over a specific time window.
+### Key Features
+* **Manual Control:** Drive the robot using keyboard commands .
+* **Safety Override:** If the robot gets too close to an obstacle, it ignores user input and automatically reverses to a safe distance.
+* **Safety Lock:** After an emergency backup, the robot "locks" its controls to prevent immediate collision loops. The user must explicitly acknowledge the stop to regain control.
+* **Data Feedback:** Publishes the robot's state (distance, direction, threshold) to a custom topic.
+* **Service Integration:** Calculates average velocity and allows dynamic updates to the safety threshold.
 
 ---
 
-##  Nodes and Logic Overview
+##  Architecture & Nodes
 
-### 1. Robot Controller Node (`robot_controller.cpp`)
-This is the "brain" of the robot. It operates autonomously to keep the robot moving while ensuring safety.
+The system consists of two main nodes interacting via custom topics and services.
 
-* **Communication:**
-    * **Subscribes to `/scan`**: Reads ranges from the laser scanner.
-    * **Publishes to `/cmd_vel`**: Sends velocity commands to the robot.
-    * **Service Server**: provides velocity data upon request.
+### 1. `user_interface.py` (Python)
+This node handles user input and sends requests to the controller.
+* **Publishes to:** `/user_cmd` (Not directly to `/cmd_vel`).
+* **Service Client:** Calls `get_avg_vel` and `change_threshold`.
+* **Functionality:**
+    * Captures `W`, `A`, `S`, `D` keystrokes for driving.
+    * Sends a "Stop" command when `X` is pressed (which resets the safety lock).
 
-* **The Logic (Algorithm):**
-    1.  The node continuously analyzes the Laser Scan ranges.
-    2.  It calculates the minimum distance to the nearest obstacle.
-    3.  **Safety Check:** If the distance is lower than the `safety_threshold` (default: 1.0m), the robot forces a stop.
-    4.  **Navigation:** If the path is clear, the robot proceeds with its default driving behavior.
-
-### 2. User Interface Node (`user_interface.py`)
-This node acts as a remote control console for the operator. It decouples the heavy processing (C++) from the user interaction (Python).
-
-* **Communication:**
-    * **Service Client:** Connects to the `GetAvgVel` service to request speed data.
-    * **Parameter Client:** Sends requests to the Controller node to update the `safety_threshold` dynamically.
-
-* **User Menu Features:**
-    1.  **Enable/Disable Robot:** Starts or stops the autonomous driving behavior.
-    2.  **Get Average Velocity:** Calls the custom service to display the robot's average speed.
-    3.  **Set Safety Threshold:** Allows the user to change how close the robot can get to walls (e.g., change from 1.0m to 0.5m) in real-time.
+### 2. `robot_controller.cpp` (C++)
+This node acts as the safety system.
+* **Subscribes to:** `/user_cmd` (User input) and `/scan` (Laser).
+* **Publishes to:** `/cmd_vel` (Actual wheels) and `/robot_state` (Custom info).
+* **The Logic:**
+    1.  **Normal Mode:** Forwards user commands from `/user_cmd` to `/cmd_vel`.
+    2.  **Danger Mode:** If `distance < threshold`, it blocks user input and forces the robot to reverse.
+    3.  **Wait Mode:** Once the robot reverses to a safe buffer distance (+0.5m), it locks movement. The user must press `x` (Stop) to unlock the system.
 
 ---
 
+##  Custom Interfaces
+The package uses the following custom definitions:
+
+* **Message: `RobotState.msg`**
+    * `float32 distance`: Distance to the closest obstacle.
+    * `string direction`: Direction of the obstacle ("Front", "Left", "Right").
+    * `float32 threshold`: The current safety setting.
+
+* **Service: `GetAvgVel.srv`**
+    * **Response:** Returns the average linear and angular velocity of the last 5 user commands.
+
+* **Service: `ChangeThreshold.srv`**
+    * **Request:** `float32 new_threshold` (e.g., 1.5).
+    * **Response:** `bool success`.
+
+---
 ##  Installation & Build
 
 ### Prerequisites
@@ -76,6 +86,7 @@ colcon build --packages-select assignment2_custom_msgs
 colcon build --packages-select assignment2_rt
 source install/setup.bash
 ```
+
 ## How to Run
 ### Step 1: Launch the Simulation
 This command starts the environment, the robot model, and the autonomous controller.
@@ -93,3 +104,14 @@ Open a second terminal to access the control menu.
 source ~/ros2_ws/install/setup.bash
 ros2 run assignment2_rt user_interface.py
 ```
+## Controls (User Interface)
+
+* e,Move Forward
+* d,Move Backward
+* s,Turn Left
+* f,Turn Right
+* x,Stop / Reset Safety Lock
+* q,Quit
+
+
+**Note**: If the robot enters "Safety Mode" and backs up, it will stop and refuse to move. You must press X to acknowledge the stop before you can drive again.
