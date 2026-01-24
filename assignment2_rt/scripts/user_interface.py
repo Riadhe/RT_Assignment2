@@ -51,8 +51,8 @@ class UI(Node):
         print("Use keys to move:")
         print("   e : Forward")
         print("   d : Backward")
-        print("   s : Turn Right")
-        print("   f : Turn Left")
+        print("   f : Turn Right")
+        print("   s : Turn Left")
         print("   x : Stop Forcefully")
         print("   q : Quit to Main Menu")
         
@@ -67,10 +67,10 @@ class UI(Node):
             elif key == 'd':
                 self.target_linear_vel = -0.5  # Set backward speed
                 print("\rMoving Backward...   ", end="")
-            elif key == 'f':
+            elif key == 's':
                 self.target_angular_vel = 1.0  # Set left turn speed
                 print("\rTurning Left...      ", end="")
-            elif key == 's':
+            elif key == 'f':
                 self.target_angular_vel = -1.0 # Set right turn speed
                 print("\rTurning Right...     ", end="")
             elif key == 'x':
